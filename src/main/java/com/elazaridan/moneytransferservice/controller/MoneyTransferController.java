@@ -1,6 +1,5 @@
 package com.elazaridan.moneytransferservice.controller;
 
-
 import com.elazaridan.moneytransferservice.dto.TransferRequest;
 import com.elazaridan.moneytransferservice.dto.UserCreationRequest;
 import com.elazaridan.moneytransferservice.dto.WithdrawalRequest;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("api/moneyManagement")
@@ -26,23 +24,18 @@ public class MoneyTransferController {
 
     @GetMapping("{recipientId}")
     public ResponseEntity<String> getRecipientBalance(@PathVariable Long recipientId) {
-        try{
+        try {
             Double recipientBalance = moneyTransferService.getRecipientBalance(recipientId);
-            return ResponseEntity.ok("Recipient current balance is: "+ recipientBalance);
-        }
-        catch (EntityNotFoundException e)
-        {
+            return ResponseEntity.ok("Recipient current balance is: " + recipientBalance);
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found");
-        }
-        catch ( PermissionDeniedException e)
-        {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Customer with ID of "+ recipientId+" is not authorized to view balance");
+        } catch (PermissionDeniedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Customer with ID of " + recipientId + " is not authorized to view balance");
         }
     }
 
     @PutMapping("withdraw/{recipientId}")
-    public ResponseEntity<String> withdrawMoney(@PathVariable Long recipientId, @Valid @RequestBody WithdrawalRequest request)
-    {
+    public ResponseEntity<String> withdrawMoney(@PathVariable Long recipientId, @Valid @RequestBody WithdrawalRequest request) {
         try {
             boolean successfulWithdrawal = moneyTransferService.withdrawMoney(recipientId, request.getAmount());
             if (successfulWithdrawal) {
@@ -71,17 +64,14 @@ public class MoneyTransferController {
     }
 
     @PostMapping
-    public void createUser( @RequestBody  UserCreationRequest userCreationRequest)
-    {
+    public void createUser(@RequestBody UserCreationRequest userCreationRequest) {
         moneyTransferService.createUser(userCreationRequest);
     }
+
     @GetMapping
-    List<Customer> getAllUsers()
-    {
+    List<Customer> getAllUsers() {
         return moneyTransferService.getAllCustomers();
     }
-
-
 
 
 }

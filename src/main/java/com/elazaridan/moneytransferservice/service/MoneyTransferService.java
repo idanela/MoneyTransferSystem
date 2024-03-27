@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +23,11 @@ public class MoneyTransferService {
         Customer recipient = customerRepository.findById(recipientId).
                 orElseThrow(() -> new EntityNotFoundException("customer with ID " + recipientId + " not found"));
 
-       if(recipient.getIsSender()) {
-           throw new PermissionDeniedException("customer with ID " + recipientId + " is not a recipient");
-       }
+        if (recipient.getIsSender()) {
+            throw new PermissionDeniedException("customer with ID " + recipientId + " is not a recipient");
+        }
 
-            return recipient.getBalance();
+        return recipient.getBalance();
     }
 
     @Transactional

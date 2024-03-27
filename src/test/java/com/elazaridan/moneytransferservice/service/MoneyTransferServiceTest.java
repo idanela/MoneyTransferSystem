@@ -14,17 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.InstanceOfAssertFactories.optional;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = MoneyTransferServiceTest.class)
-
 class MoneyTransferServiceTest {
 
     @Mock
@@ -38,10 +35,11 @@ class MoneyTransferServiceTest {
     @BeforeEach
     void setUp() {
         customers = new ArrayList<>();
-        customers.add(new Customer(1243L, "Idan","Idan@gmail.com","Utah",true,50d));
-        customers.add(new Customer(1255L, "Roy", "Roy@Yahoo.com", "New York",false,100d));
+        customers.add(new Customer(1243L, "Idan", "Idan@gmail.com", "Utah", true, 50d));
+        customers.add(new Customer(1255L, "Roy", "Roy@Yahoo.com", "New York", false, 100d));
 
     }
+
     @Test
     void getRecipientBalance() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.ofNullable(customers.get(1)));
@@ -49,6 +47,7 @@ class MoneyTransferServiceTest {
         assertThat(amount).isNotNull();
         assertThat(amount).isEqualTo(customers.get(1).getBalance());
     }
+
     @Test
     void getRecipientBalanceForNonExistingCustomer() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -56,6 +55,7 @@ class MoneyTransferServiceTest {
                 .isInstanceOf(EntityNotFoundException.class);
 
     }
+
     @Test
     void getRecipientBalanceForNonRecipient() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.ofNullable(customers.get(0)));
@@ -67,7 +67,7 @@ class MoneyTransferServiceTest {
     @Test
     void withdrawMoney() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.ofNullable(customers.get(1)));
-        boolean successfulWithdrawal = moneyTransferService.withdrawMoney(1255L,50.5);
+        boolean successfulWithdrawal = moneyTransferService.withdrawMoney(1255L, 50.5);
         assertThat(successfulWithdrawal).isTrue();
 
     }
@@ -75,21 +75,21 @@ class MoneyTransferServiceTest {
     @Test
     void withdrawMoneyInsufficientFunds() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.ofNullable(customers.get(1)));
-        boolean successfulWithdrawal = moneyTransferService.withdrawMoney(1255L,630.5);
+        boolean successfulWithdrawal = moneyTransferService.withdrawMoney(1255L, 630.5);
         assertThat(successfulWithdrawal).isFalse();
     }
 
     @Test
     void withdrawMoneyNonRecipient() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.ofNullable(customers.get(0)));
-        boolean successfulWithdrawal = moneyTransferService.withdrawMoney(1255L,60.5);
+        boolean successfulWithdrawal = moneyTransferService.withdrawMoney(1255L, 60.5);
         assertThat(successfulWithdrawal).isFalse();
     }
 
     @Test
     void withdrawMoneyCustomerNotExists() {
         when(customerRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> moneyTransferService.withdrawMoney(12055L,10d))
+        assertThatThrownBy(() -> moneyTransferService.withdrawMoney(12055L, 10d))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -123,6 +123,7 @@ class MoneyTransferServiceTest {
         assertThatThrownBy(() -> moneyTransferService.sendMoneyToRecipient(1234L, transferRequest))
                 .isInstanceOf(EntityNotFoundException.class);
     }
+
     @Test
     void sendMoneyFromNonSender() {
         when(customerRepository.findById(1234L)).thenReturn(Optional.empty());

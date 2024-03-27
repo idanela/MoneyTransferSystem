@@ -21,11 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,6 +53,7 @@ public class CustomersControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+
     @Test
     void getBalanceOfNonExistingRecipient() throws Exception {
         Mockito.when(this.moneyTransferService.getRecipientBalance(anyLong())).thenThrow(new EntityNotFoundException());
@@ -61,6 +62,7 @@ public class CustomersControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+
     @Test
     void getBalanceOfNonRecipient() throws Exception {
         Mockito.when(this.moneyTransferService.getRecipientBalance(anyLong())).thenThrow(new PermissionDeniedException(""));
@@ -72,75 +74,37 @@ public class CustomersControllerTest {
 
     @Test
     void withdrawMoney() throws Exception {
-        Mockito.when(this.moneyTransferService.withdrawMoney(anyLong(),anyDouble())).thenReturn(true);
+        Mockito.when(this.moneyTransferService.withdrawMoney(anyLong(), anyDouble())).thenReturn(true);
 
-        WithdrawalRequest  request= new WithdrawalRequest(15.5d);
+        WithdrawalRequest request = new WithdrawalRequest(15.5d);
 
         mockMvc.perform(put("/api/moneyManagement/withdraw/1255")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+
     @Test
     void withdrawMoneyInsufficientFundsOrUnAuthorizedCustomer() throws Exception {
-        Mockito.when(this.moneyTransferService.withdrawMoney(anyLong(),anyDouble())).thenReturn(false);
+        Mockito.when(this.moneyTransferService.withdrawMoney(anyLong(), anyDouble())).thenReturn(false);
 
-        WithdrawalRequest  request= new WithdrawalRequest(150d);
+        WithdrawalRequest request = new WithdrawalRequest(150d);
 
         mockMvc.perform(put("/api/moneyManagement/withdraw/1255")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
-                        .andExpect(status().isBadRequest())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+
     @Test
     void withdrawMoneyCustomerNotFound() throws Exception {
-        Mockito.when(this.moneyTransferService.withdrawMoney(anyLong(),anyDouble())).thenThrow(new EntityNotFoundException());
+        Mockito.when(this.moneyTransferService.withdrawMoney(anyLong(), anyDouble())).thenThrow(new EntityNotFoundException());
 
-        WithdrawalRequest  request= new WithdrawalRequest(15.5d);
+        WithdrawalRequest request = new WithdrawalRequest(15.5d);
 
         mockMvc.perform(put("/api/moneyManagement/withdraw/1255")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(request)))
-                        .andExpect(status().isNotFound())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
-
-
-    @Test
-    void sendMoneyToRecipient() throws Exception {
-        Mockito.when(this.moneyTransferService.sendMoneyToRecipient(anyLong(),any())).thenReturn(true);
-
-        TransferRequest  request= new TransferRequest(123L,150d);
-
-        mockMvc.perform(put("/api/moneyManagement/transfer/1255")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(request)))
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
-
-    @Test
-    void sendMoneyToNonRecipientOrSentByNonSender() throws Exception {
-        Mockito.when(this.moneyTransferService.sendMoneyToRecipient(anyLong(),any())).thenReturn(false);
-
-        TransferRequest  request= new TransferRequest(123L,150d);
-
-        mockMvc.perform(put("/api/moneyManagement/transfer/1255")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(request)))
-                        .andExpect(status().isUnauthorized())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
-
-    @Test
-    void sendMoneySenderOrRecipientNotFound() throws Exception {
-        Mockito.when(this.moneyTransferService.sendMoneyToRecipient(anyLong(),any())).thenThrow(new EntityNotFoundException());
-
-        TransferRequest  request= new TransferRequest(123L,150d);
-
-        mockMvc.perform(put("/api/moneyManagement/transfer/1255")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
                 .andExpect(status().isNotFound())
@@ -148,8 +112,44 @@ public class CustomersControllerTest {
     }
 
 
+    @Test
+    void sendMoneyToRecipient() throws Exception {
+        Mockito.when(this.moneyTransferService.sendMoneyToRecipient(anyLong(), any())).thenReturn(true);
 
+        TransferRequest request = new TransferRequest(123L, 150d);
 
+        mockMvc.perform(put("/api/moneyManagement/transfer/1255")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void sendMoneyToNonRecipientOrSentByNonSender() throws Exception {
+        Mockito.when(this.moneyTransferService.sendMoneyToRecipient(anyLong(), any())).thenReturn(false);
+
+        TransferRequest request = new TransferRequest(123L, 150d);
+
+        mockMvc.perform(put("/api/moneyManagement/transfer/1255")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void sendMoneySenderOrRecipientNotFound() throws Exception {
+        Mockito.when(this.moneyTransferService.sendMoneyToRecipient(anyLong(), any())).thenThrow(new EntityNotFoundException());
+
+        TransferRequest request = new TransferRequest(123L, 150d);
+
+        mockMvc.perform(put("/api/moneyManagement/transfer/1255")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 
 
     private String asJsonString(Object obj) throws JsonProcessingException {
